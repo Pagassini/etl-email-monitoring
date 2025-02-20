@@ -1,0 +1,16 @@
+FROM apache/airflow:slim-latest-python3.11
+
+USER root
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    vim \
+    && apt-get autoremove -yqq --purge \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+    USER airflow
+ARG PIP_PACKAGES="requests-cache retry-requests numpy pandas psycopg2-binary \
+virtualenv celery redis urllib3 requests kubernetes"
+
+RUN pip install --no-cache-dir "apache-airflow[celery,redis,postgres]==$AIRFLOW_VERSION" $PIP_PACKAGES \
+    --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.11.txt"
